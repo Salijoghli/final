@@ -1,7 +1,7 @@
 const app = document.querySelector("#app");
 const button = document.createElement("button");
 button.textContent = "Toggle Landmarks";
-let drawLandmarks = true;
+let drawLandmarks = false;
 
 button.addEventListener("click", () => {
   drawLandmarks = !drawLandmarks;
@@ -33,6 +33,7 @@ const loadModels = async () => {
       faceapi.nets.faceRecognitionNet.loadFromUri("./models"),
       faceapi.nets.faceExpressionNet.loadFromUri("./models"),
       faceapi.nets.ageGenderNet.loadFromUri("./models"),
+      faceapi.nets.ssdMobilenetv1.loadFromUri("/models"),
     ]);
     console.log("Recording");
     startVideo();
@@ -41,9 +42,21 @@ const loadModels = async () => {
   }
 };
 
+const handleFaceRecognition = async (detection, canvas) => {
+  const labeledFaceDescriptors = await loadLabeledImages();
+  const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6);
+  const bestMatch = faceMatcher.findBestMatch(detection.descriptor);
+
+  const box = detection.detection.box;
+  const drawBox = new faceapi.draw.DrawBox(box, {
+    label: bestMatch.toString(),
+  });
+  drawBox.draw(canvas);
+};
+
 const faceDetectionLoop = async (canvas, displaySize) => {
   const detections = await faceapi
-    .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+    .detectAllFaces(video)
     .withFaceLandmarks()
     .withFaceExpressions()
     .withFaceDescriptors()
@@ -54,12 +67,32 @@ const faceDetectionLoop = async (canvas, displaySize) => {
   drawLandmarks && faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
   faceapi.draw.drawFaceExpressions(canvas, resizedDetections);
   resizedDetections.forEach((detection) => {
-    const box = detection.detection.box;
-    const drawBox = new faceapi.draw.DrawBox(box, {
-      label: Math.round(detection.age) + " year old " + detection.gender,
-    });
-    drawBox.draw(canvas);
+    handleFaceRecognition(detection, canvas);
   });
+};
+
+const loadLabeledImages = async () => {
+  const labels = ["guga"];
+  const labeledFaceDescriptors = [];
+
+  for (const label of labels) {
+    const descriptions = [];
+    for (let i = 1; i <= 4; i++) {
+      const img = await faceapi.fetchImage(
+        `https://raw.githubusercontent.com/Salijoghli/final/main/images//${label}/${label} (${i}).jpg`
+      );
+      const detections = await faceapi
+        .detectSingleFace(img)
+        .withFaceLandmarks()
+        .withFaceDescriptor();
+      descriptions.push(detections.descriptor);
+    }
+    labeledFaceDescriptors.push(
+      new faceapi.LabeledFaceDescriptors(label, descriptions)
+    );
+  }
+
+  return labeledFaceDescriptors;
 };
 
 const handleFaceDetection = () => {
@@ -76,12 +109,6 @@ const handleFaceDetection = () => {
   animate();
 };
 
-loadModels();
+await loadModels();
 
 video.addEventListener("play", handleFaceDetection);
-
-// const image = await faceapi.fetchImage("/images/guga/guga.jpg");
-
-// // displaying the fetched image content
-// const myImg = document.getElementById("myImg");
-// myImg.src = image.src;
