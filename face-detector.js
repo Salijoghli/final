@@ -16,6 +16,8 @@ video.height = 560;
 app.appendChild(button);
 app.appendChild(video);
 
+console.log(1 + 2);
+
 const startVideo = async () => {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
