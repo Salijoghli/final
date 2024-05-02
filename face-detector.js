@@ -16,8 +16,6 @@ video.height = 560;
 app.appendChild(button);
 app.appendChild(video);
 
-console.log(1 + 2);
-
 const startVideo = async () => {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -34,6 +32,7 @@ const loadModels = async () => {
       faceapi.nets.faceLandmark68Net.loadFromUri("./models"),
       faceapi.nets.faceRecognitionNet.loadFromUri("./models"),
       faceapi.nets.faceExpressionNet.loadFromUri("./models"),
+      faceapi.nets.ageGenderNet.loadFromUri("./models"),
     ]);
     console.log("Recording");
     startVideo();
@@ -46,12 +45,21 @@ const faceDetectionLoop = async (canvas, displaySize) => {
   const detections = await faceapi
     .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
     .withFaceLandmarks()
-    .withFaceExpressions();
+    .withFaceExpressions()
+    .withFaceDescriptors()
+    .withAgeAndGender();
   const resizedDetections = faceapi.resizeResults(detections, displaySize);
   canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
   faceapi.draw.drawDetections(canvas, resizedDetections);
   drawLandmarks && faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
   faceapi.draw.drawFaceExpressions(canvas, resizedDetections);
+  resizedDetections.forEach((detection) => {
+    const box = detection.detection.box;
+    const drawBox = new faceapi.draw.DrawBox(box, {
+      label: Math.round(detection.age) + " year old " + detection.gender,
+    });
+    drawBox.draw(canvas);
+  });
 };
 
 const handleFaceDetection = () => {
@@ -71,3 +79,9 @@ const handleFaceDetection = () => {
 loadModels();
 
 video.addEventListener("play", handleFaceDetection);
+
+// const image = await faceapi.fetchImage("/images/guga/guga.jpg");
+
+// // displaying the fetched image content
+// const myImg = document.getElementById("myImg");
+// myImg.src = image.src;
