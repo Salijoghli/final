@@ -13,7 +13,58 @@ canvas {
   position: absolute;
 }
 
-button {
-  position: absolute;
-  top: 4%;
+.button-container {
+  margin-bottom: 10px;
+  display: none;
+}
+
+.toggle-button {
+  padding: 10px 20px;
+  margin-right: 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #4caf50;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.toggle-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  color: #666666;
+}
+
+.toggle-button:disabled:hover {
+  background-color: #cccaff;
+}
+
+.toggle-button:hover {
+  background-color: #45a049;
+}
+
+#loading {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 15px;
+  border-radius: 5px;
+  z-index: 1000;
+}
+
+#toDetRec {
+  padding: 1px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+}
+
+#toDetRec:hover {
+  background-color: #0056b3;
 }
