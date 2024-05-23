@@ -43,14 +43,12 @@ async function start() {
 }
 
 function loadLabeledImages() {
-  const labels = ["Guga", "Guladi"];
+  const labels = ["guga"];
   return Promise.all(
     labels.map(async (label) => {
       const descriptions = [];
       for (let i = 1; i <= 2; i++) {
-        const img = await faceapi.fetchImage(
-          `https://raw.githubusercontent.com/Salijoghli/Final/master/images/${label}/${i}.jpg`
-        );
+        const img = await faceapi.fetchImage(`images/${label}/${i}.jpg`);
         if (!img) continue;
         const detections = await faceapi
           .detectSingleFace(img)
