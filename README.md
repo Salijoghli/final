@@ -1,2 +1,6 @@
 # final
-final project
+
+face detection on video
+face recognition on image
+
+using face-api library

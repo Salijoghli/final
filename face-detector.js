@@ -2,6 +2,7 @@ const buttonTogglePause = document.getElementById("togglePause");
 const video = document.getElementById("video");
 const app = document.getElementById("app");
 const loadingDiv = document.getElementById("loading");
+
 let isPaused = false;
 let loading = true;
 const state = {
